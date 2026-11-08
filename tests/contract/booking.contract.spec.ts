@@ -55,7 +55,7 @@ test.describe('Booking API contract', { tag: '@contract' }, () => {
 });
 
 test.describe('Booking API contract: known provider drift', { tag: '@regression' }, () => {
-  test('totalprice is never returned as null', async ({ bookingClient, bookings }) => {
+  test('totalprice is never returned as null', { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
     knownIssue('RB-004', 'A non-numeric totalprice is stored and served as null, breaking the contract');
 
     const response = await bookingClient.create(BookingBuilder.aBooking().buildWith('totalprice', 'abc'));

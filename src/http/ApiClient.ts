@@ -9,13 +9,15 @@ export interface RequestOptions {
 }
 
 const SENSITIVE_HEADERS = new Set(['authorization', 'cookie', 'set-cookie']);
+const SENSITIVE_FIELDS = new Set(['password', 'token', 'access_token', 'refresh_token', 'client_secret']);
 
 /**
  * Thin wrapper over Playwright's APIRequestContext.
  *
  * Every exchange is attached to the test report so a failed run can be
  * diagnosed from the HTML report alone, without re-running locally.
- * Auth headers are masked before they are written anywhere.
+ * Auth headers and credential fields in bodies are masked before they are
+ * written anywhere, because reports may be published (e.g. GitHub Pages).
  */
 export class ApiClient {
   constructor(
@@ -79,11 +81,11 @@ export class ApiClient {
 
     const responseText = method === 'HEAD' ? '' : await response.text();
     const exchange = {
-      request: { method, url, headers: maskHeaders(headers), body: body ?? null },
+      request: { method, url, headers: maskHeaders(headers), body: maskFields(body ?? null) },
       response: {
         status: response.status(),
         headers: maskHeaders(response.headers()),
-        body: tryParse(responseText),
+        body: maskFields(tryParse(responseText)),
       },
     };
 
@@ -100,6 +102,16 @@ function maskHeaders(headers: Record<string, string>): Record<string, string> {
       SENSITIVE_HEADERS.has(key.toLowerCase()) ? [key, '***'] : [key, value],
     ),
   );
+}
+
+function maskFields(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(maskFields);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, v]) => [key, SENSITIVE_FIELDS.has(key.toLowerCase()) ? '***' : maskFields(v)]),
+    );
+  }
+  return value;
 }
 
 function tryParse(text: string): unknown {

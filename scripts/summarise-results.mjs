@@ -25,15 +25,16 @@ const tests = [];
 
 const { expected, unexpected, flaky, skipped, duration } = report.stats;
 const knownIssues = tests.filter((t) => t.annotations.some((a) => a.type === 'known-issue'));
+const trulyPassed = expected - knownIssues.filter((t) => t.status === 'expected').length;
 const failures = tests.filter((t) => t.status === 'unexpected');
 const flakyTests = tests.filter((t) => t.status === 'flaky');
 
 const lines = [
   `### ${unexpected === 0 ? 'PASSED' : 'FAILED'}: ${stage}`,
   '',
-  '| Passed | Failed | Flaky | Skipped | Known issues | Duration |',
+  '| Passed | Failed | Flaky | Skipped | Known issues (expected to fail) | Duration |',
   '| ---: | ---: | ---: | ---: | ---: | ---: |',
-  `| ${expected} | ${unexpected} | ${flaky} | ${skipped} | ${knownIssues.length} | ${(duration / 1000).toFixed(1)}s |`,
+  `| ${trulyPassed} | ${unexpected} | ${flaky} | ${skipped} | ${knownIssues.length} | ${(duration / 1000).toFixed(1)}s |`,
 ];
 
 if (failures.length) {
@@ -51,7 +52,14 @@ if (flakyTests.length) {
 
 if (knownIssues.length) {
   const ids = [...new Set(knownIssues.map((t) => t.annotations.find((a) => a.type === 'known-issue').description.split(':')[0]))];
-  lines.push('', `<details><summary>Tracked provider defects (${ids.length})</summary>`, '', ids.sort().join(', '), '', '</details>');
+  lines.push(
+    '',
+    `<details><summary>Tracked provider defects (${ids.length}). These tests fail on purpose and are counted separately; filter the HTML report with <code>@known-issue</code></summary>`,
+    '',
+    ids.sort().join(', '),
+    '',
+    '</details>',
+  );
 }
 
 console.log(lines.join('\n'));

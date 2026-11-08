@@ -25,6 +25,10 @@
 3. Common causes: shared data (use the builder and fixture), timing assumptions (poll a condition, don't sleep), provider cold start (first request of the run).
 4. Still flaky after a week: quarantine it. Move it to `@regression` with a `// quarantined: TICKET-123, owner, review date` comment.
 
+## A known-issue test shows an error but "passed"
+
+Expected. It's tagged `@known-issue`: it asserts the correct behaviour, the provider still has the defect, so the failure is expected and counted as a pass. Check the defect ID in the test's annotations against `docs/api-behaviour-findings.md`. Nothing to do.
+
 ## A known issue started passing
 
 The job fails with an "expected to fail, but passed" error on a `knownIssue()` test. Good news: the provider fixed it.

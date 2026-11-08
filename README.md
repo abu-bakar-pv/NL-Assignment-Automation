@@ -33,7 +33,7 @@ No browsers are needed. The suite runs against:
 | `npm run test:gate` | What blocks a merge: `@unit`, `@critical`, `@contract` |
 | `npm run test:regression` | Broader coverage, including tracked provider defects |
 | `npm run typecheck` / `npm run lint` | Static checks (also part of the gate) |
-| `npm run report` | Open the last HTML report |
+| `npm run report` | Open the last HTML report (CI also publishes a merged report to GitHub Pages from `main`) |
 | `npm run mock:start` | Run the dealer gateway on its own (port 4010) |
 | `npm run ai:bundle` | Build a redacted evidence bundle from the last failing run |
 
