@@ -109,7 +109,7 @@ A non-zero exit code is what fails the `gate` job in
 `.github/workflows/api-quality-gate.yml`. With branch protection that makes
 **Gate** a required check, that job blocks the merge.
 
-Talking point: the consumer wants a field the provider doesn't send. The gate
+Why it matters: the consumer wants a field the provider doesn't send. The gate
 catches the mismatch at PR time, before an integration breaks in a shared
 environment or in production. The fix is a conversation with the provider
 team, not a change to the test.
@@ -123,20 +123,13 @@ patch -p1 -R < demo/require-currency.patch
 npm run test:gate; echo "exit: $?"     # 51 passed, exit: 0
 ```
 
-## Running it in GitHub Actions (optional, only if you choose to publish)
+## The same flow in GitHub Actions
 
-Nothing in this project has been pushed anywhere. If you later put it in a
-repository you control, the same flow runs in CI:
-
-1. Push `main`, then add a branch protection rule on `main`: require a pull
-   request, and require the **Gate (static checks, unit, critical, contract)**
-   status check.
+1. Add a branch protection rule on `main`: require a pull request, and require
+   the **Gate (static checks, unit, critical, contract)** status check.
 2. Create a branch, apply the patch, commit, and open a PR. The `gate` job
    fails, `regression` is skipped, and merging is blocked.
 3. Revert the change and push. Both jobs go green.
-
-The workflow file has been parsed and its commands verified locally. It has
-not been run on GitHub.
 
 ## Why this protects releases
 
