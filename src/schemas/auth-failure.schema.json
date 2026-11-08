@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "auth-failure",
+  "title": "AuthFailure",
+  "description": "Rejected credentials on POST /auth.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reason"],
+  "properties": {
+    "reason": { "type": "string" }
+  }
+}

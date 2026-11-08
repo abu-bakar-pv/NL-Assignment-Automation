@@ -1,0 +1,94 @@
+name: API quality gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+  # Restful-Booker's public demo credentials. Real environments read these from
+  # repository secrets: ${{ secrets.BOOKER_USERNAME }} / ${{ secrets.BOOKER_PASSWORD }}.
+  BOOKER_USERNAME: admin
+  BOOKER_PASSWORD: password123
+
+jobs:
+  # Fast, blocking checks. Branch protection requires this job, so a red
+  # result here stops the merge. Target runtime: under 2 minutes.
+  gate:
+    name: Gate (static checks, unit, critical, contract)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # The suite is API-only, so no browser binaries are installed.
+      # A UI project would add: npx playwright install --with-deps chromium
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Critical, contract and unit tests
+        run: npm run test:gate
+
+      - name: Summarise results
+        if: always()
+        run: node scripts/summarise-results.mjs gate >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-report
+          path: reports/
+          retention-days: 14
+
+  # Broader coverage that runs only once the gate is green. Known provider
+  # defects are expected failures here; anything unexpected fails the job.
+  regression:
+    name: Regression
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Regression tests
+        run: npm run test:regression
+
+      - name: Summarise results
+        if: always()
+        run: node scripts/summarise-results.mjs regression >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-report
+          path: reports/
+          retention-days: 14

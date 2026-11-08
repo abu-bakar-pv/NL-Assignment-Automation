@@ -1,0 +1,9 @@
+node_modules/
+reports/
+test-results/
+playwright-report/
+.env
+ai/output/*
+!ai/output/.gitkeep
+.DS_Store
+.claude/settings.local.json

@@ -1,0 +1,22 @@
+diff --git a/src/schemas/booking.schema.json b/src/schemas/booking.schema.json
+index 421ed02..f2265d2 100644
+--- a/src/schemas/booking.schema.json
++++ b/src/schemas/booking.schema.json
+@@ -5,7 +5,7 @@
+   "description": "Consumer contract for a booking resource as returned by GET /booking/{id}.",
+   "type": "object",
+   "additionalProperties": false,
+-  "required": ["firstname", "lastname", "totalprice", "depositpaid", "bookingdates"],
++  "required": ["firstname", "lastname", "totalprice", "depositpaid", "bookingdates", "currency"],
+   "properties": {
+     "firstname": { "type": "string", "minLength": 1 },
+     "lastname": { "type": "string", "minLength": 1 },
+@@ -20,6 +20,7 @@
+         "checkout": { "type": "string", "format": "date" }
+       }
+     },
+-    "additionalneeds": { "type": ["string", "null"] }
++    "additionalneeds": { "type": ["string", "null"] },
++    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+   }
+ }

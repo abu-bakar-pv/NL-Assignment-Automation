@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "booking-list",
+  "title": "BookingList",
+  "description": "Response of GET /booking.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["bookingid"],
+    "properties": {
+      "bookingid": { "type": "integer", "minimum": 1 }
+    }
+  }
+}

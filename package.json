@@ -1,0 +1,34 @@
+{
+  "name": "api-quality-platform",
+  "version": "1.0.0",
+  "description": "API quality engineering reference: Playwright API tests, contract checks, CI quality gate and AI-assisted QA tooling.",
+  "scripts": {
+    "test": "playwright test",
+    "test:gate": "playwright test --grep \"@critical|@contract|@unit\"",
+    "test:regression": "playwright test --grep @regression",
+    "test:unit": "playwright test --project=unit",
+    "report": "playwright show-report reports/html",
+    "mock:start": "tsx mock/dealer-gateway/server.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "ai:bundle": "tsx ai/build-failure-bundle.ts"
+  },
+  "license": "UNLICENSED",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^22.20.5",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "failures": [
+    {
+      "title": "Booking API contract > GET /booking/{id} matches the booking contract",
+      "file": "contract/booking.contract.spec.ts",
+      "line": 27,
+      "error": "Error: Payload does not match schema \"booking\":\n  - (root) must have required property 'currency'\n\nPayload:\n{\n  \"firstname\": \"Qa\",\n  \"lastname\": \"Auto-72668-mw87yi56-2\",\n  \"totalprice\": 250,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2027-03-01\",\n    \"checkout\": \"2027-03-05\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+      "exchanges": [
+        {
+          "request": {
+            "method": "POST",
+            "url": "https://restful-booker.herokuapp.com/booking",
+            "headers": {
+              "Accept": "application/json"
+            },
+            "body": {
+              "firstname": "Qa",
+              "lastname": "Auto-72668-mw87yi56-2",
+              "totalprice": 250,
+              "depositpaid": true,
+              "bookingdates": {
+                "checkin": "2027-03-01",
+                "checkout": "2027-03-05"
+              },
+              "additionalneeds": "Breakfast"
+            }
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "content-type": "application/json; charset=utf-8"
+            },
+            "body": {
+              "bookingid": 765,
+              "booking": {
+                "firstname": "Qa",
+                "lastname": "Auto-72668-mw87yi56-2",
+                "totalprice": 250,
+                "depositpaid": true,
+                "bookingdates": {
+                  "checkin": "2027-03-01",
+                  "checkout": "2027-03-05"
+                },
+                "additionalneeds": "Breakfast"
+              }
+            }
+          }
+        },
+        {
+          "request": {
+            "method": "GET",
+            "url": "https://restful-booker.herokuapp.com/booking/765",
+            "headers": {
+              "Accept": "application/json"
+            },
+            "body": null
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "content-type": "application/json; charset=utf-8"
+            },
+            "body": {
+              "firstname": "Qa",
+              "lastname": "Auto-72668-mw87yi56-2",
+              "totalprice": 250,
+              "depositpaid": true,
+              "bookingdates": {
+                "checkin": "2027-03-01",
+                "checkout": "2027-03-05"
+              },
+              "additionalneeds": "Breakfast"
+            }
+          }
+        },
+        {
+          "request": {
+            "method": "DELETE",
+            "url": "https://restful-booker.herokuapp.com/booking/765",
+            "headers": {
+              "Accept": "application/json",
+              "Cookie": "[REDACTED]"
+            },
+            "body": null
+          },
+          "response": {
+            "status": 201,
+            "headers": {
+              "content-type": "text/plain; charset=utf-8"
+            },
+            "body": "Created"
+          }
+        }
+      ]
+    }
+  ],
+  "totalFailuresInRun": 1,
+  "schemas": {
+    "booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "booking",
+      "title": "Booking",
+      "description": "Consumer contract for a booking resource as returned by GET /booking/{id}.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "firstname",
+        "lastname",
+        "totalprice",
+        "depositpaid",
+        "bookingdates",
+        "currency"
+      ],
+      "properties": {
+        "firstname": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lastname": {
+          "type": "string",
+          "minLength": 1
+        },
+        "totalprice": {
+          "type": "number",
+          "minimum": 0
+        },
+        "depositpaid": {
+          "type": "boolean"
+        },
+        "bookingdates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "checkin",
+            "checkout"
+          ],
+          "properties": {
+            "checkin": {
+              "type": "string",
+              "format": "date"
+            },
+            "checkout": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "additionalneeds": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      }
+    }
+  },
+  "recentChange": "43e195b Require currency on bookings for multi-market pricing\n\ndiff --git a/src/schemas/booking.schema.json b/src/schemas/booking.schema.json\nindex 421ed02..f2265d2 100644\n--- a/src/schemas/booking.schema.json\n+++ b/src/schemas/booking.schema.json\n@@ -5,7 +5,7 @@\n   \"description\": \"Consumer contract for a booking resource as returned by GET /booking/{id}.\",\n   \"type\": \"object\",\n   \"additionalProperties\": false,\n-  \"required\": [\"firstname\", \"lastname\", \"totalprice\", \"depositpaid\", \"bookingdates\"],\n+  \"required\": [\"firstname\", \"lastname\", \"totalprice\", \"depositpaid\", \"bookingdates\", \"currency\"],\n   \"properties\": {\n     \"firstname\": { \"type\": \"string\", \"minLength\": 1 },\n     \"lastname\": { \"type\": \"string\", \"minLength\": 1 },\n@@ -20,6 +20,7 @@\n         \"checkout\": { \"type\": \"string\", \"format\": \"date\" }\n       }\n     },\n-    \"additionalneeds\": { \"type\": [\"string\", \"null\"] }\n+    \"additionalneeds\": { \"type\": [\"string\", \"null\"] },\n+    \"currency\": { \"type\": \"string\", \"pattern\": \"^[A-Z]{3}$\" }\n   }\n }\n"
+}

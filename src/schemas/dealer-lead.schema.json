@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dealer-lead",
+  "title": "DealerLead",
+  "description": "Sales lead exposed by the (virtualised) dealer gateway. Customer data is synthetic.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["leadId", "dealerId", "vehicle", "status", "createdAt"],
+  "properties": {
+    "leadId": { "type": "string", "pattern": "^LD-[0-9]{4}$" },
+    "dealerId": { "type": "string" },
+    "vehicle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vin", "model"],
+      "properties": {
+        "vin": { "type": "string", "pattern": "^[A-HJ-NPR-Z0-9]{17}$" },
+        "model": { "type": "string" }
+      }
+    },
+    "status": { "enum": ["NEW", "CONTACTED", "QUALIFIED", "LOST", "WON"] },
+    "customerRef": { "type": ["string", "null"] },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
