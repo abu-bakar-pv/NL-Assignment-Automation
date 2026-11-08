@@ -9,6 +9,9 @@ It is a working demonstration, not a framework to adopt wholesale. The patterns
 are meant to be lifted one at a time into an existing in-house framework
 (see [docs/framework-assessment-and-roadmap.md](docs/framework-assessment-and-roadmap.md)).
 
+
+**Latest test report:** https://abu-bakar-pv.github.io/NL-Assignment-Automation/ (published from `main` on every push and daily; see [docs/quality-gate-demo.md](docs/quality-gate-demo.md#published-html-report-github-pages))
+
 ## Quick start
 
 ```bash
@@ -33,7 +36,7 @@ No browsers are needed. The suite runs against:
 | `npm run test:gate` | What blocks a merge: `@unit`, `@critical`, `@contract` |
 | `npm run test:regression` | Broader coverage, including tracked provider defects |
 | `npm run typecheck` / `npm run lint` | Static checks (also part of the gate) |
-| `npm run report` | Open the last HTML report |
+| `npm run report` | Open the last HTML report (CI also publishes a merged report to GitHub Pages from `main`) |
 | `npm run mock:start` | Run the dealer gateway on its own (port 4010) |
 | `npm run ai:bundle` | Build a redacted evidence bundle from the last failing run |
 
@@ -91,7 +94,7 @@ The short version is below. Each decision has an ADR in [docs/adr](docs/adr).
 - **Data is owned by the test.** Every test creates what it needs and the `bookings` fixture deletes it. Nothing depends on pre-existing records in a shared environment.
 - **Contracts describe consumers, strictly.** Schemas use `additionalProperties: false`, so an added, renamed or retyped field is a reviewed change, not a silent one.
 - **Tags drive the pipeline.** `@critical` and `@contract` gate the merge; `@regression` runs after.
-- **Defects are tracked, not skipped.** `knownIssue('RB-003', ...)` keeps the correct expectation and marks the test as expected-to-fail. A provider fix flips it to an unexpected pass, and the build says so.
+- **Defects are tracked, not hidden.** `knownIssue('RB-003', ...)` keeps the correct expectation; the test is tagged `@known-issue` and reported as skipped with the defect ID. Running with `RUN_KNOWN_ISSUES=true` executes them as expected failures, so a provider fix shows up as an unexpected pass, and the build says so.
 - **Authorisation is tested where it exists.** Restful-Booker has one admin role, so tenant and scope rules are tested against the virtualised gateway. This is stated explicitly rather than implied.
 - **AI proposes, people decide.** Inputs are redacted before any model call, the redacted bundle is saved, and outputs are marked PROPOSED/UNVERIFIED until reviewed in [docs/ai-review-log.md](docs/ai-review-log.md).
 

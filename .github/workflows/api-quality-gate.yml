@@ -4,7 +4,16 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Daily run against the live API, so provider changes show up even on days
+  # with no commits. 05:30 UTC; GitHub may start scheduled runs a little late.
+  schedule:
+    - cron: '30 5 * * *'
   workflow_dispatch:
+    inputs:
+      run_known_issues:
+        description: Run known-issue tests (normally skipped) to check whether the provider fixed them
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,6 +28,8 @@ env:
   # repository secrets: ${{ secrets.BOOKER_USERNAME }} / ${{ secrets.BOOKER_PASSWORD }}.
   BOOKER_USERNAME: admin
   BOOKER_PASSWORD: password123
+  # Known-issue tests are skipped unless a manual run ticks run_known_issues.
+  RUN_KNOWN_ISSUES: ${{ github.event_name == 'workflow_dispatch' && inputs.run_known_issues && 'true' || 'false' }}
 
 jobs:
   # Fast, blocking checks. Branch protection requires this job, so a red
@@ -48,6 +59,8 @@ jobs:
 
       - name: Critical, contract and unit tests
         run: npm run test:gate
+        env:
+          REPORT_STAGE: gate
 
       - name: Summarise results
         if: always()
@@ -60,6 +73,14 @@ jobs:
           name: gate-report
           path: reports/
           retention-days: 14
+
+      - name: Upload blob report for merging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-gate
+          path: reports/blob-gate/
+          retention-days: 1
 
   # Broader coverage that runs only once the gate is green. Known provider
   # defects are expected failures here; anything unexpected fails the job.
@@ -80,6 +101,8 @@ jobs:
 
       - name: Regression tests
         run: npm run test:regression
+        env:
+          REPORT_STAGE: regression
 
       - name: Summarise results
         if: always()
@@ -92,3 +115,65 @@ jobs:
           name: regression-report
           path: reports/
           retention-days: 14
+
+      - name: Upload blob report for merging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-regression
+          path: reports/blob-regression/
+          retention-days: 1
+
+  # Merges the gate and regression reports into one HTML report and publishes
+  # it to GitHub Pages. Runs for main only (not pull requests), and also when
+  # the gate failed, so the published report shows why.
+  # One-time setup: Settings > Pages > Source: GitHub Actions.
+  publish-report:
+    name: Publish HTML report
+    needs: [gate, regression]
+    if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.gate.result != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Download stage reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: blob-*
+          path: reports/all-blob
+          merge-multiple: true
+
+      - name: Merge into one HTML report
+        run: npx playwright merge-reports --reporter html reports/all-blob
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: site
+          PLAYWRIGHT_HTML_OPEN: never
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Link the report in the run summary
+        run: |
+          echo "### HTML report: ${{ steps.deploy.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"

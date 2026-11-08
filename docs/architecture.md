@@ -86,7 +86,7 @@ flowchart LR
 
   subgraph R["Job: regression"]
     direction TB
-    R1["@regression<br/>known issues expected to fail"]
+    R1["@regression<br/>known issues skipped by default"]
   end
 
   G --> A1[(gate-report artifact)]

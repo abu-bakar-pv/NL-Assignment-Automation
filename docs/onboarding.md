@@ -47,7 +47,7 @@ Push and watch the gate. Ask the test owner for review.
 | Assertions | `toHaveStatus` for status (prints the body on failure), `toMatchSchema` for shape |
 | Negative auth | Assert the refusal **and** that nothing changed |
 | Waiting | No sleeps; poll a condition with a deadline |
-| Provider bugs | `knownIssue('ID', 'summary')` + entry in the defect register |
+| Provider bugs | Tag the test `@known-issue`, call `knownIssue('ID', 'summary')`, add an entry to the defect register |
 
 ## Who to ask
 

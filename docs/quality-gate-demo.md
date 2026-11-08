@@ -10,9 +10,58 @@ pipeline in `.github/workflows/api-quality-gate.yml`.
 | 1 | `gate` | typecheck, lint, `@unit`, `@critical`, `@contract` (51 tests, about 9s of test time locally) | Yes (required status check) |
 | 2 | `regression` | `@regression` incl. tracked provider defects | Yes, if configured as required; it only runs once `gate` is green |
 
+| 3 | `publish-report` | Merges both stages into one HTML report and deploys it to GitHub Pages | No; runs on `main` only, also after a red gate |
+
 A test that fails unexpectedly fails the job. A `knownIssue()` test that
 starts *passing* also fails the job, so a provider fix can't slip through
 unnoticed.
+
+### Known issues: skipped by default
+
+Tests tagged `@known-issue` assert the *correct* behaviour of an API that has a
+documented defect (see `docs/api-behaviour-findings.md`). By default they are
+**skipped**, with the defect ID as the skip reason, so they show neither as a
+pass nor as a failure:
+
+- **HTML report:** filter with `@known-issue`. Each test shows a `known-issue`
+  annotation with the defect ID and summary.
+- **Run summary:** a table of defects with their test counts and results.
+
+To check whether the provider has fixed any of them, run with
+`RUN_KNOWN_ISSUES=true` (locally), or tick **run_known_issues** under
+**Actions → API quality gate → Run workflow**. They then run as expected
+failures. A fixed defect shows up as a known issue that now passes, the job
+fails, and the summary lists it under "Known issues that now pass".
+
+## Published HTML report (GitHub Pages)
+
+On every push to `main`, every day at 05:30 UTC (scheduled run), and on a
+manual **Run workflow**, `publish-report` merges the gate and regression blob
+reports and deploys the result to the repository's GitHub Pages site. Each
+deployment replaces the previous report, so the site always shows the latest run.
+
+Scheduled runs use the workflow file on the default branch only, and GitHub
+can start them some minutes late. On a public repository with no activity for
+60 days, GitHub disables the schedule until it is re-enabled in the Actions tab.
+
+One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+After the next run on `main`, the URL is shown on the `publish-report` job and
+in **Settings → Pages**.
+
+The report is public if the repository is. `ApiClient` masks `Authorization`,
+`Cookie` and credential fields (`password`, `token`, `client_secret`, ...) in
+every attachment. A local merge of both stages (90 tests, 154 attachments) was
+checked and contained none of the demo credentials.
+
+Reproduce the merged report locally:
+
+```bash
+REPORT_STAGE=gate npm run test:gate
+REPORT_STAGE=regression npm run test:regression
+mkdir -p reports/all-blob && cp reports/blob-*/*.zip reports/all-blob/
+PLAYWRIGHT_HTML_OUTPUT_DIR=site npx playwright merge-reports --reporter html reports/all-blob
+npx playwright show-report site
+```
 
 ## The four steps (local, no git needed)
 

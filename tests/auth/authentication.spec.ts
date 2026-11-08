@@ -84,12 +84,12 @@ test.describe('Authentication', () => {
   });
 
   test.describe('HTTP semantics', { tag: '@regression' }, () => {
-    test('rejected credentials return 401', async ({ authClient }) => {
+    test('rejected credentials return 401', { tag: '@known-issue' }, async ({ authClient }) => {
       knownIssue('RB-006', 'POST /auth returns 200 with {"reason":"Bad credentials"} instead of 401');
       await expect(await authClient.createToken({ ...valid, password: 'wrong' })).toHaveStatus(401);
     });
 
-    test('a missing token returns 401 rather than 403', async ({ bookingClient, bookings }) => {
+    test('a missing token returns 401 rather than 403', { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
       knownIssue('RB-007', 'Unauthenticated requests return 403 instead of 401');
       const { bookingid } = await bookings.create();
       await expect(await bookingClient.remove(bookingid, { kind: 'none' })).toHaveStatus(401);

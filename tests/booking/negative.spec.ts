@@ -21,7 +21,7 @@ test.describe('Booking input validation', { tag: '@regression' }, () => {
     const required: Array<keyof Booking> = ['firstname', 'lastname', 'totalprice', 'depositpaid', 'bookingdates'];
 
     for (const field of required) {
-      test(`POST without ${field} is rejected with 400`, async ({ bookingClient, bookings }) => {
+      test(`POST without ${field} is rejected with 400`, { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
         knownIssue('RB-003', 'Missing required fields cause 500 instead of 400');
 
         const response = await bookingClient.create(BookingBuilder.aBooking().buildWithout(field));
@@ -45,7 +45,7 @@ test.describe('Booking input validation', { tag: '@regression' }, () => {
     ];
 
     for (const [field, value] of cases) {
-      test(`${field} as ${JSON.stringify(value)} is rejected with 400`, async ({ bookingClient, bookings }) => {
+      test(`${field} as ${JSON.stringify(value)} is rejected with 400`, { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
         knownIssue('RB-004', 'Wrong types are coerced or crash the service instead of returning 400');
 
         const response = await bookingClient.create(BookingBuilder.aBooking().buildWith(field, value));
@@ -63,7 +63,7 @@ test.describe('Booking input validation', { tag: '@regression' }, () => {
       await expect(response).toHaveStatus(400);
     });
 
-    test('a non-JSON content type is rejected with 415', async ({ bookingClient }) => {
+    test('a non-JSON content type is rejected with 415', { tag: '@known-issue' }, async ({ bookingClient }) => {
       knownIssue('RB-012', 'text/plain body returns 500 instead of 415 Unsupported Media Type');
 
       const response = await bookingClient.create('firstname=Plain', { 'Content-Type': 'text/plain' });
@@ -90,7 +90,7 @@ test.describe('Booking input validation', { tag: '@regression' }, () => {
       expect(booking.bookingdates).toEqual({ checkin: '2027-05-01', checkout: '2027-05-01' });
     });
 
-    test('a negative price is rejected', async ({ bookingClient, bookings }) => {
+    test('a negative price is rejected', { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
       knownIssue('RB-005', 'Business rules (price >= 0, non-empty names, date order) are not validated');
 
       const response = await bookingClient.create(BookingBuilder.aBooking().withPrice(-1).build());
@@ -98,7 +98,7 @@ test.describe('Booking input validation', { tag: '@regression' }, () => {
       await expect(response).toHaveStatus(400);
     });
 
-    test('check-out before check-in is rejected', async ({ bookingClient, bookings }) => {
+    test('check-out before check-in is rejected', { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
       knownIssue('RB-005', 'Business rules (price >= 0, non-empty names, date order) are not validated');
 
       const response = await bookingClient.create(
@@ -108,7 +108,7 @@ test.describe('Booking input validation', { tag: '@regression' }, () => {
       await expect(response).toHaveStatus(400);
     });
 
-    test('an empty first name is rejected', async ({ bookingClient, bookings }) => {
+    test('an empty first name is rejected', { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
       knownIssue('RB-005', 'Business rules (price >= 0, non-empty names, date order) are not validated');
 
       const response = await bookingClient.create(BookingBuilder.aBooking().withGuest('', 'Smith').build());
@@ -116,14 +116,14 @@ test.describe('Booking input validation', { tag: '@regression' }, () => {
       await expect(response).toHaveStatus(400);
     });
 
-    test('a decimal price is stored without loss of precision', async ({ bookings }) => {
+    test('a decimal price is stored without loss of precision', { tag: '@known-issue' }, async ({ bookings }) => {
       knownIssue('RB-009', 'Decimal prices are silently truncated (10.75 -> 10)');
 
       const { booking } = await bookings.create(BookingBuilder.aBooking().withPrice(10.75));
       expect(booking.totalprice).toBe(10.75);
     });
 
-    test('an invalid calendar date is rejected', async ({ bookingClient, bookings }) => {
+    test('an invalid calendar date is rejected', { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
       knownIssue('RB-010', 'Invalid dates are accepted and stored as "0NaN-aN-aN"');
 
       const response = await bookingClient.create(

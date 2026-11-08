@@ -10,7 +10,7 @@ import { knownIssue } from '../../src/support/knownIssue';
  * the conversation is backed by an executable record.
  */
 test.describe('HTTP conformance', { tag: '@regression' }, () => {
-  test('creating a booking returns 201 Created', async ({ bookingClient, bookings }) => {
+  test('creating a booking returns 201 Created', { tag: '@known-issue' }, async ({ bookingClient, bookings }) => {
     knownIssue('RB-001', 'POST /booking returns 200 instead of 201');
 
     const response = await bookingClient.create(BookingBuilder.aBooking().build());
@@ -18,14 +18,14 @@ test.describe('HTTP conformance', { tag: '@regression' }, () => {
     await expect(response).toHaveStatus(201);
   });
 
-  test('deleting a booking returns 204 No Content', async ({ bookingClient, bookings, adminAuth }) => {
+  test('deleting a booking returns 204 No Content', { tag: '@known-issue' }, async ({ bookingClient, bookings, adminAuth }) => {
     knownIssue('RB-002', 'DELETE /booking/{id} returns 201 instead of 204');
 
     const { bookingid } = await bookings.create();
     await expect(await bookingClient.remove(bookingid, adminAuth)).toHaveStatus(204);
   });
 
-  test('deleting an already deleted booking returns 404', async ({ bookingClient, bookings, adminAuth }) => {
+  test('deleting an already deleted booking returns 404', { tag: '@known-issue' }, async ({ bookingClient, bookings, adminAuth }) => {
     knownIssue('RB-011', 'Second DELETE returns 405 instead of 404');
 
     const { bookingid } = await bookings.create();
@@ -40,7 +40,7 @@ test.describe('HTTP conformance', { tag: '@regression' }, () => {
   ] as const;
 
   for (const [method, path] of unsupported) {
-    test(`${method} ${path} returns 405 Method Not Allowed`, async ({ bookerApi }) => {
+    test(`${method} ${path} returns 405 Method Not Allowed`, { tag: '@known-issue' }, async ({ bookerApi }) => {
       knownIssue('RB-008', 'Unsupported methods return 404 instead of 405');
 
       await expect(await bookerApi.send(method, path, { data: {} })).toHaveStatus(405);

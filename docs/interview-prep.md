@@ -91,11 +91,13 @@ Where the spec is silent (is a same-day stay valid?), that's a question for
 the product owner, not an assumption in a test.
 
 **13. What do you do when the API under test has bugs you can't fix?**
-Keep the correct assertion and mark it `knownIssue(id)`. It's tracked as an
-expected failure in regression, not in the gate. The defect register links the
-ID to the evidence. When the provider fixes it, the test passes unexpectedly
-and fails the build, so we remove the marker. That's better than skipping
-(which hides it) or asserting the wrong value (which locks it in).
+Keep the correct assertion, tag the test `@known-issue` and call
+`knownIssue(id)`. Day to day it's reported as skipped with the defect ID as
+the reason, so it's visible but neither a pass nor a failure. The run summary
+lists every open defect. A periodic run with known issues enabled executes them
+as expected failures: when the provider fixes one, it passes unexpectedly and
+fails the build, so we remove the marker. That's better than a silent skip
+(which hides the defect) or asserting the wrong value (which locks it in).
 
 ## Authentication and authorisation
 
