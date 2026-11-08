@@ -25,13 +25,15 @@
 3. Common causes: shared data (use the builder and fixture), timing assumptions (poll a condition, don't sleep), provider cold start (first request of the run).
 4. Still flaky after a week: quarantine it. Move it to `@regression` with a `// quarantined: TICKET-123, owner, review date` comment.
 
-## A known-issue test shows an error but "passed"
+## Tests show as skipped with "Known issue RB-0xx"
 
-Expected. It's tagged `@known-issue`: it asserts the correct behaviour, the provider still has the defect, so the failure is expected and counted as a pass. Check the defect ID in the test's annotations against `docs/api-behaviour-findings.md`. Nothing to do.
+Expected. They're tagged `@known-issue`: each asserts the correct behaviour, and the provider still has the defect. The defect ID is in the skip reason and the annotations. Nothing to do.
+
+To re-check them, run `RUN_KNOWN_ISSUES=true npm test` locally, or tick **run_known_issues** under Actions → API quality gate → Run workflow. Do this at least monthly, and whenever the provider ships a release.
 
 ## A known issue started passing
 
-The job fails with an "expected to fail, but passed" error on a `knownIssue()` test. Good news: the provider fixed it.
+On a run with known issues enabled, the job fails with "Expected to fail, but passed", and the summary lists the test under "Known issues that now pass". Good news: the provider fixed it.
 
 1. Confirm the fix with curl (see `docs/api-behaviour-findings.md` for the original probe).
 2. Remove the `knownIssue()` line from the test.

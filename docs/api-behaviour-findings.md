@@ -2,7 +2,7 @@
 
 Recorded on 2026-11-08 by probing `https://restful-booker.herokuapp.com` with
 curl before writing the tests. Each entry is backed by a `knownIssue()` test
-that asserts the *correct* behaviour and is expected to fail until the
+that asserts the *correct* behaviour. It is reported as skipped by default, and when run with `RUN_KNOWN_ISSUES=true` it is expected to fail until the
 provider fixes it.
 
 | ID | Area | Expected | Observed | Severity | Test |

@@ -9,6 +9,11 @@ on:
   schedule:
     - cron: '30 5 * * *'
   workflow_dispatch:
+    inputs:
+      run_known_issues:
+        description: Run known-issue tests (normally skipped) to check whether the provider fixed them
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +28,8 @@ env:
   # repository secrets: ${{ secrets.BOOKER_USERNAME }} / ${{ secrets.BOOKER_PASSWORD }}.
   BOOKER_USERNAME: admin
   BOOKER_PASSWORD: password123
+  # Known-issue tests are skipped unless a manual run ticks run_known_issues.
+  RUN_KNOWN_ISSUES: ${{ github.event_name == 'workflow_dispatch' && inputs.run_known_issues && 'true' || 'false' }}
 
 jobs:
   # Fast, blocking checks. Branch protection requires this job, so a red
@@ -166,3 +173,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deploy
         uses: actions/deploy-pages@v4
+
+      - name: Link the report in the run summary
+        run: |
+          echo "### HTML report: ${{ steps.deploy.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"

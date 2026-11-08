@@ -25,16 +25,19 @@ const tests = [];
 
 const { expected, unexpected, flaky, skipped, duration } = report.stats;
 const knownIssues = tests.filter((t) => t.annotations.some((a) => a.type === 'known-issue'));
-const trulyPassed = expected - knownIssues.filter((t) => t.status === 'expected').length;
-const failures = tests.filter((t) => t.status === 'unexpected');
+const knownSkipped = knownIssues.filter((t) => t.status === 'skipped').length;
+const trulyPassed = expected - knownIssues.filter((t) => t.status === 'expected' && t.expectedStatus === 'failed').length;
+// A known-issue test that fails "unexpectedly" was expected to fail but passed: the provider may have fixed it.
+const possiblyFixed = knownIssues.filter((t) => t.status === 'unexpected');
+const failures = tests.filter((t) => t.status === 'unexpected' && !possiblyFixed.includes(t));
 const flakyTests = tests.filter((t) => t.status === 'flaky');
 
 const lines = [
   `### ${unexpected === 0 ? 'PASSED' : 'FAILED'}: ${stage}`,
   '',
-  '| Passed | Failed | Flaky | Skipped | Known issues (expected to fail) | Duration |',
+  '| Passed | Failed | Flaky | Skipped | Known issues | Duration |',
   '| ---: | ---: | ---: | ---: | ---: | ---: |',
-  `| ${trulyPassed} | ${unexpected} | ${flaky} | ${skipped} | ${knownIssues.length} | ${(duration / 1000).toFixed(1)}s |`,
+  `| ${trulyPassed} | ${failures.length} | ${flaky} | ${skipped - knownSkipped} | ${knownIssues.length} | ${(duration / 1000).toFixed(1)}s |`,
 ];
 
 if (failures.length) {
@@ -50,15 +53,32 @@ if (flakyTests.length) {
   for (const t of flakyTests) lines.push(`- \`${t.file}\` ${t.title}`);
 }
 
+if (possiblyFixed.length) {
+  lines.push('', '#### Known issues that now pass (provider may have fixed them)');
+  for (const t of possiblyFixed) lines.push(`- \`${t.file}\` ${t.title}: confirm, then remove knownIssue() and update the defect register`);
+}
+
 if (knownIssues.length) {
-  const ids = [...new Set(knownIssues.map((t) => t.annotations.find((a) => a.type === 'known-issue').description.split(':')[0]))];
+  const byDefect = new Map();
+  for (const t of knownIssues) {
+    const description = t.annotations.find((a) => a.type === 'known-issue').description;
+    const id = description.split(':')[0];
+    const entry = byDefect.get(id) ?? { summary: description.slice(id.length + 2), tests: 0, states: new Set() };
+    entry.tests += 1;
+    entry.states.add(t.status === 'skipped' ? 'skipped' : t.status === 'unexpected' ? 'NOW PASSING' : 'still failing');
+    byDefect.set(id, entry);
+  }
   lines.push(
     '',
-    `<details><summary>Tracked provider defects (${ids.length}). These tests fail on purpose and are counted separately; filter the HTML report with <code>@known-issue</code></summary>`,
+    '#### Known issues (provider defects, see docs/api-behaviour-findings.md)',
     '',
-    ids.sort().join(', '),
+    'Filter the HTML report with `@known-issue`. Re-check them with the RUN_KNOWN_ISSUES option.',
     '',
-    '</details>',
+    '| Defect | Summary | Tests | Result |',
+    '| --- | --- | ---: | --- |',
+    ...[...byDefect.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([id, e]) => `| ${id} | ${e.summary} | ${e.tests} | ${[...e.states].join(', ')} |`),
   );
 }
 

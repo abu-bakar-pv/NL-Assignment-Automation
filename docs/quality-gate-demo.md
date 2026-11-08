@@ -16,15 +16,22 @@ A test that fails unexpectedly fails the job. A `knownIssue()` test that
 starts *passing* also fails the job, so a provider fix can't slip through
 unnoticed.
 
-### Why some failing tests show as "passed"
+### Known issues: skipped by default
 
 Tests tagged `@known-issue` assert the *correct* behaviour of an API that has a
-documented defect (see `docs/api-behaviour-findings.md`). They are marked
-`test.fail()`, so Playwright reports the expected failure as a pass. The error
-and the request/response are still shown in the report as evidence. Filter the
-HTML report with `@known-issue` to see them all. The CI summary counts them
-separately from real passes. If one of them ever passes, that is an
-*unexpected* pass and the job fails, which means the provider fixed the bug.
+documented defect (see `docs/api-behaviour-findings.md`). By default they are
+**skipped**, with the defect ID as the skip reason, so they show neither as a
+pass nor as a failure:
+
+- **HTML report:** filter with `@known-issue`. Each test shows a `known-issue`
+  annotation with the defect ID and summary.
+- **Run summary:** a table of defects with their test counts and results.
+
+To check whether the provider has fixed any of them, run with
+`RUN_KNOWN_ISSUES=true` (locally), or tick **run_known_issues** under
+**Actions → API quality gate → Run workflow**. They then run as expected
+failures. A fixed defect shows up as a known issue that now passes, the job
+fails, and the summary lists it under "Known issues that now pass".
 
 ## Published HTML report (GitHub Pages)
 

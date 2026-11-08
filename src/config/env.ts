@@ -25,4 +25,6 @@ export const env = {
     },
   },
   isCI: Boolean(process.env.CI),
+  // Known-issue tests are skipped unless this is set (see src/support/knownIssue.ts).
+  runKnownIssues: process.env.RUN_KNOWN_ISSUES === 'true',
 } as const;

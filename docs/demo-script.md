@@ -102,14 +102,17 @@ npx playwright test tests/authz tests/integration --reporter=list
 > "I probed the API before writing tests and found 12 defects. This one
 > truncates 10.75 to 10, which is a money bug. I don't skip the test, and I
 > don't assert the wrong value. The test asserts the correct behaviour and is
-> marked as a known issue. If the provider fixes it, this test passes
-> unexpectedly and the build tells us to remove the marker."
+> marked as a known issue, so day to day it shows as skipped with the defect
+> ID. When I want to know whether the provider fixed it, I run known issues for
+> real."
 
 ```bash
 npx playwright test -g "decimal price" --reporter=list
+RUN_KNOWN_ISSUES=true npx playwright test -g "decimal price" --reporter=list
 ```
 
-**Expect:** `1 passed`. The line shows `✘` because it is expected to fail.
+**Expect:** first `1 skipped` (reason `Known issue RB-009: ...`), then `1 passed`,
+with the line showing `✘` because the failure is expected.
 
 ## 5. The quality gate (4 min)
 
