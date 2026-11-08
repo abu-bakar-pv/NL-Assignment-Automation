@@ -66,8 +66,8 @@ tests/
   unit/        schemas, builder, redaction
 ai/            redaction and failure-bundle script (deterministic, unit-tested)
 .claude/skills/ Claude Code skills: api-test-scenarios, triage-gate-failure
-docs/          strategy, architecture, runbooks, roadmap, demo script
-presentation/  slide deck for the session
+docs/          strategy, architecture, runbooks, roadmap
+demo/          change used to demonstrate the quality gate blocking a build
 ```
 
 ## How a test reads
@@ -122,6 +122,3 @@ More detail is in [docs/onboarding.md](docs/onboarding.md).
 | Existing framework and six-month roadmap | [docs/framework-assessment-and-roadmap.md](docs/framework-assessment-and-roadmap.md) |
 | Runbook | [docs/runbook.md](docs/runbook.md) |
 | Onboarding | [docs/onboarding.md](docs/onboarding.md) |
-| Demo script | [docs/demo-script.md](docs/demo-script.md) |
-| Interview preparation | [docs/interview-prep.md](docs/interview-prep.md) |
-| Presentation (10 slides, speaker notes) | [presentation/Staff-QA-AI-Automation-Case-Study.pptx](presentation/Staff-QA-AI-Automation-Case-Study.pptx) |
