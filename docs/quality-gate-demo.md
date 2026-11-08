@@ -28,8 +28,14 @@ separately from real passes. If one of them ever passes, that is an
 
 ## Published HTML report (GitHub Pages)
 
-On every push to `main`, `publish-report` merges the gate and regression blob
-reports and deploys the result to the repository's GitHub Pages site.
+On every push to `main`, every day at 05:30 UTC (scheduled run), and on a
+manual **Run workflow**, `publish-report` merges the gate and regression blob
+reports and deploys the result to the repository's GitHub Pages site. Each
+deployment replaces the previous report, so the site always shows the latest run.
+
+Scheduled runs use the workflow file on the default branch only, and GitHub
+can start them some minutes late. On a public repository with no activity for
+60 days, GitHub disables the schedule until it is re-enabled in the Actions tab.
 
 One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 After the next run on `main`, the URL is shown on the `publish-report` job and

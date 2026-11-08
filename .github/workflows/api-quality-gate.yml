@@ -4,6 +4,10 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Daily run against the live API, so provider changes show up even on days
+  # with no commits. 05:30 UTC; GitHub may start scheduled runs a little late.
+  schedule:
+    - cron: '30 5 * * *'
   workflow_dispatch:
 
 concurrency:
