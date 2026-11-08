@@ -24,10 +24,8 @@ permissions:
 
 env:
   CI: true
-  # Restful-Booker's public demo credentials. Real environments read these from
-  # repository secrets: ${{ secrets.BOOKER_USERNAME }} / ${{ secrets.BOOKER_PASSWORD }}.
-  BOOKER_USERNAME: admin
-  BOOKER_PASSWORD: password123
+  BOOKER_USERNAME: ${{ secrets.BOOKER_USERNAME }}
+  BOOKER_PASSWORD: ${{ secrets.BOOKER_PASSWORD }}
   # Known-issue tests are skipped unless a manual run ticks run_known_issues.
   RUN_KNOWN_ISSUES: ${{ github.event_name == 'workflow_dispatch' && inputs.run_known_issues && 'true' || 'false' }}
 
